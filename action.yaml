@@ -1,0 +1,10 @@
+name: 'Evercode check'
+description: 'Downloads a file and runs a yarn command'
+inputs:
+  repo_name:
+    description: 'The name of repository'
+    required: true
+outputs: {}
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
