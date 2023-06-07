@@ -4,6 +4,9 @@ inputs:
   repo_name:
     description: 'The name of repository'
     required: true
+  branch_name:
+    description: 'The name of branch'
+    required: true
 outputs: {}
 runs:
   using: 'node12'
