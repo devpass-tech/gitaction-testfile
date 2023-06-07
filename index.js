@@ -29,13 +29,29 @@ async function run() {
 
 async function getTaskFile(questId, branchName) {
   const testUrl = 'https://devpass-api-bucket.s3.amazonaws.com/testes/testinfo.json';
-  await downloadFile(testUrl, 'source/testinfo.json');
-
-  const testDictionary = require('./source/testinfo.json');
+  const testFile = await getFile(testUrl);
+  const testDictionary = JSON.parse(testFile);
   var testInfo = testDictionary[questId][branchName];
-
   return testInfo;
 }
+
+async function getFile(fileUrl) {
+  return new Promise((resolve, reject) => {
+    https.get(fileUrl, response => {
+      let fileContent = '';
+
+      response.on('data', data => {
+        fileContent += data;
+      });
+
+      response.on('end', () => {
+        resolve(fileContent);
+      });
+    }).on('error', error => {
+      reject(error);
+    });
+  });
+};
 
 async function downloadFile(fileUrl, fileName) {
   return new Promise((resolve, reject) => {
