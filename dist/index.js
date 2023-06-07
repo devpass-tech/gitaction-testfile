@@ -10688,7 +10688,10 @@ async function run() {
     if(testInfo){
       const fileUrl = `https://devpass-api-bucket.s3.amazonaws.com/testes/${testInfo.test_file}`;
       await downloadFile(fileUrl, testInfo.test_path);
-      await exec.exec(testInfo.test_command);
+
+      for (const command of testInfo.test_command){
+        await exec.exec(command);
+      }
     } else {
       core.setFailed('Test not found!');
     }
