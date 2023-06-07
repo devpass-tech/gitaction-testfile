@@ -4,7 +4,6 @@ const https = require('https');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const testDictionary = require('./source/testinfo.json');
 
 async function run() {
   try {
@@ -13,15 +12,14 @@ async function run() {
     const questId = splittedRepoName[splittedRepoName.length - 1];
 
     const branchName = core.getInput('branch_name');
-    const splittedBranchName = branchName.split('/');
-    const taskId = splittedBranchName[splittedBranchName.length - 2];
-
-    const testInfo = await getTaskFile(questId, taskId);
+    const testInfo = await getTaskFile(questId, branchName);
     
     if(testInfo){
       const fileUrl = `https://devpass-api-bucket.s3.amazonaws.com/testes/${testInfo.test_file}`;
       await downloadFile(fileUrl, testInfo.test_path);
       await exec.exec(testInfo.test_command);
+    } else {
+      core.setFailed('Test not found!');
     }
     
   } catch (error) {
@@ -29,8 +27,12 @@ async function run() {
   }
 }
 
-async function getTaskFile(questId, taskId) {
-  var testInfo = testDictionary[questId][taskId];
+async function getTaskFile(questId, branchName) {
+  const testUrl = 'https://devpass-api-bucket.s3.amazonaws.com/testes/testinfo.json';
+  await downloadFile(testUrl, 'source/testinfo.json');
+
+  const testDictionary = require('./source/testinfo.json');
+  var testInfo = testDictionary[questId][branchName];
 
   return testInfo;
 }

@@ -1,9 +1,1 @@
-{
-    "c31f0dc53a": {
-        "task-1": {
-            "test_file": "hello-js.test.js",
-            "test_path": "hello-js.test.js",
-            "test_command": "yarn test"
-        }
-    }
-}
+{}
