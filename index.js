@@ -4,17 +4,21 @@ const https = require('https');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const testDictionary = require('./source/testinfo.json');
 
 async function run() {
   try {
     const repoName = core.getInput('repo_name');
     const splittedRepoName = repoName.split('-');
     const questId = splittedRepoName[splittedRepoName.length - 1];
-    const username = splittedRepoName[splittedRepoName.length - 2];
-    const taskId = await getCurrentTask(questId, username);
 
-    if(taskId){
-      const testInfo = await getTaskFile(taskId);
+    const branchName = core.getInput('branch_name');
+    const splittedBranchName = branchName.split('/');
+    const taskId = splittedBranchName[splittedBranchName.length - 2];
+
+    const testInfo = await getTaskFile(questId, taskId);
+    
+    if(testInfo){
       const fileUrl = `https://devpass-api-bucket.s3.amazonaws.com/testes/${testInfo.test_file}`;
       await downloadFile(fileUrl, testInfo.test_path);
       await exec.exec(testInfo.test_command);
@@ -25,34 +29,10 @@ async function run() {
   }
 }
 
-async function getCurrentTask(questId, username) {
-  const apiUrl = `http://localhost:3003/state/${username}/quest/${questId}/current-task`;
-  var result;
+async function getTaskFile(questId, taskId) {
+  var testInfo = testDictionary[questId][taskId];
 
-  await axios
-    .get(apiUrl)
-    .then(
-        function (response) {
-            result = response.data
-        }
-    );
-
-  return result;
-}
-
-async function getTaskFile(taskId) {
-  const apiUrl = `http://localhost:3003/task/${taskId}/test-info`;
-  var result;
-
-  await axios
-    .get(apiUrl)
-    .then(
-        function (response) {
-          result = response.data
-        }
-    );
-
-  return result;
+  return testInfo;
 }
 
 async function downloadFile(fileUrl, fileName) {
